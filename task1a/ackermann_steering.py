@@ -19,8 +19,8 @@
 *****************************************************************************************
 '''
 
-# Team ID:          < Team-ID >
-# Author List:      < Names of the team members who worked on this file, comma separated >
+# Team ID:          < eYRC5195 >
+# Author List:      < Raghunandan sharma, Tejprakash >
 # Filename:         ackermann_steering.py
 # Functions:        ackermann_wheel_angles
 # Global variables: < List any global variables you add, "None" if you add none >
@@ -68,6 +68,23 @@ def ackermann_wheel_angles(delta):
     WHEEL_OFFSET changes the effective half-track width inside each wheel's triangle.
     '''
 
+    # Straight ahead - return exact zero for both wheels. Use a small tolerance
+    # instead of `delta == 0.0`, since callers may pass a value that is
+    # mathematically zero but has tiny floating-point noise (e.g. from
+    # np.arange), and that should still count as "straight ahead".
+    if abs(delta) < 1e-9:
+        return 0.0, 0.0
+
+    # The kingpin (steering) axis is offset from the wheel centre by WHEEL_OFFSET,
+    # so the half-width used inside each wheel's right-triangle is the track's
+    # half-width measured at the kingpin axis, not at the wheel centre.
+    half_width_at_kingpin = (TRACK_WIDTH / 2.0) - WHEEL_OFFSET
+
+    t = math.tan(delta)
+    k = half_width_at_kingpin / WHEELBASE
+
+    left_angle = math.atan(t / (1.0 - k * t))
+    right_angle = math.atan(t / (1.0 + k * t))
 
     return left_angle, right_angle
 
